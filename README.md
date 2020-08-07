@@ -11,6 +11,10 @@ Hitori Rules.
 - You are not allowed to have two Black squares touching horizontally or vertically (diagonally is ok).
 - Any White square can be reached from any other (i.e. they are connected)
 
+Data structures/ algorithms used in this project.
+- Matrix
+- Breadth-first search
+
 
 Necessary libraries to install.
 -Pygame 
