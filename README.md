@@ -17,3 +17,6 @@ Necessary libraries to install.
 
 (If pip install pygame doesnt work, follow the URL link below)
 https://intercom.help/codakidonline/en/articles/2551585-how-to-install-pygame
+
+Example of what program outputs
+![Hitori Example](https://i.imgur.com/NGCYEaI.gif)
