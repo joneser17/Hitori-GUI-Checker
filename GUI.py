@@ -110,9 +110,13 @@ def redraw_window(win, board, time, strikes):
     win.fill((255,255,255))     #Fills the background to white.
     fnt = pygame.font.SysFont("comicsans", 40)
     check_fnt = pygame.font.SysFont("comicsans",30)
+    home_but_fnt = pygame.font.SysFont("comicsans", 25)
 
     text = fnt.render("Time: " + format_time(time), 1, (0,0,0))
     win.blit(text, (540 - 160, 560))
+    bp_type = get_current_ft(setting.number)
+    text = home_but_fnt.render("Personal Best:" + format_time(bp_type), 1, (0,0,0))
+    win.blit(text, (540 - 170, 600))
     mouse = pygame.mouse.get_pos()
     
     # Checks to see if mouse position is within the "check..." box
@@ -122,6 +126,14 @@ def redraw_window(win, board, time, strikes):
         pygame.draw.rect(win, (255 ,215,0), (260,550,100,40))
     check_text = check_fnt.render("Check...",1,(0,0,0))
     win.blit(check_text, (270,560))
+
+    # Back Button, returns to home screen/ board select.
+    if(260 + 100 > mouse[0] > 260 and 600 + 40 > mouse[1] > 600):
+        pygame.draw.rect(win, (0 ,201,87), (260,600,100,40), 3)
+    else:
+        pygame.draw.rect(win, (128 ,128,128), (260,600,100,40))
+    check_text = home_but_fnt.render("Main Menu",1,(0,0,0))
+    win.blit(check_text, (264,610))
 
     # Draw Strikes
     text_strikes = fnt.render("X " * strikes, 1, (255, 0, 0))
@@ -150,76 +162,109 @@ def button_selected_toFalse():
     setting.picked_5 = False
     setting.picked_6 = False
     setting.picked_7 = False
-    
+
+# Sets the fastest time the user has completed a puzzle locally. (Resets on termination of GUI)
+def set_fastest_time(time):
+    if(setting.number == 5):
+        if(time < setting.the_5_highScore or setting.the_5_highScore == 0):
+            setting.the_5_highScore = time
+    if(setting.number == 6):
+        if(time < setting.the_6_highScore or setting.the_6_highScore == 0):
+            setting.the_6_highscore = time
+    if(setting.number == 6):
+        if(time < setting.the_7_highScore or setting.the_7_highScore == 0):
+            setting.the_7_highScore = time
+
+def get_current_ft(num):
+    if(num == 5):
+        return setting.the_5_highScore
+    if(num == 6):
+        return setting.the_6_highScore
+    if(num == 7):
+        return setting.the_7_highScore
+    return 0
+
 def main():
-    width = 540
-    height = 650
-    main_menu = pygame.display.set_mode((width,height))
-    mode_pick = True
-    run = True
-    
-    while mode_pick:
-        reddraw_main_menu(main_menu)
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    mode_pick = False
-                    run = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
-                if(button(220,100,100,40,pos)):
-                    setting.number = 5
-                    button_selected_toFalse()
-                    setting.picked_5 = True
-                if(button(220,160,100,40,pos)):
-                    setting.number = 6
-                    button_selected_toFalse()
-                    setting.picked_6 = True
-                if(button(220,220,100,40,pos)):
-                    setting.number = 7
-                    button_selected_toFalse()
-                    setting.picked_7 = True
-                if(button(420,580,100,40,pos)):
-                    mode_pick = False             
-        pygame.display.update()
+    while(setting.menu_pick):
 
-    win = pygame.display.set_mode((width,height))
-    pygame.display.set_caption("Hitori")
-    the_board = return_board(setting.number)        # Sets the board to a random board based on what size board the user chose.
-    board = Grid(setting.number, setting.number, 540, 540,the_board)
-    board.mark_all_cubes_type()
-    start = time.time()
-    strikes = 0
-    
-    while run:
-        play_time = round(time.time() - start) 
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    run = False
-            if event.type == pygame.QUIT:
-                run = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
+        width = 540
+        height = 650
+        main_menu = pygame.display.set_mode((width,height))
+        mode_pick = True
+        run = True
+        
+        while mode_pick:
+            reddraw_main_menu(main_menu)
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        mode_pick = False
+                        run = False
+                        setting.menu_pick = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pos = pygame.mouse.get_pos()
+                    if(button(220,100,100,40,pos)):
+                        setting.number = 5
+                        button_selected_toFalse()
+                        setting.picked_5 = True
+                    if(button(220,160,100,40,pos)):
+                        setting.number = 6
+                        button_selected_toFalse()
+                        setting.picked_6 = True
+                    if(button(220,220,100,40,pos)):
+                        setting.number = 7
+                        button_selected_toFalse()
+                        setting.picked_7 = True
+                    if(button(420,580,100,40,pos)):
+                        mode_pick = False             
+            pygame.display.update()
 
-                #Checks to if a button is clicked below the board
-                if(button(260,550,100,40,pos)):
-                    if(strikes <= 8):
-                        strikes += 1
-                    if(board.path_check()):
-                        print("All non marked squares can reach each other")
-                    else:
-                        print("Marked Cubes are blocking off non marked cubes, Wrong")
-                    if(board.adjacent_marked_check() and board.num_col_row_check() and board.path_check()):
-                        print("win")  
-                    else:
-                        print("fail")   
-            
-                #checks to see if game board is clicked
-                clicked = board.click(pos)
-                if clicked:
-                    board.select(clicked[0], clicked[1])   
-        redraw_window(win, board, play_time, strikes)
-        pygame.display.update()
+        win = pygame.display.set_mode((width,height))
+        pygame.display.set_caption("Hitori")
+        the_board = return_board(setting.number)        # Sets the board to a random board based on what size board the user chose.
+        board = Grid(setting.number, setting.number, 540, 540,the_board)
+        board.mark_all_cubes_type()
+        start = time.time()
+        strikes = 0
+        clock_running = True
+        
+        while run:
+            if(clock_running):
+                play_time = round(time.time() - start)
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        run = False
+                        setting.menu_pick = False
+                if event.type == pygame.QUIT:
+                    run = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pos = pygame.mouse.get_pos()
+
+                    #Checks to if a button is clicked below the board
+                    if(button(260,550,100,40,pos)):
+                          
+                        if(board.path_check()):
+                            print("All non marked squares can reach each other")
+                        else:
+                            print("Marked Cubes are blocking off non marked cubes, Wrong")
+                        if(board.adjacent_marked_check() and board.num_col_row_check() and board.path_check()):
+                            print("win")
+                            clock_running = False
+                            set_fastest_time(play_time)       
+                        else:
+                            print("fail")
+                            if(strikes <= 8):
+                                strikes += 1  
+
+                    if(button(260,600,100,40,pos)):
+                        run = False
+
+                    #checks to see if game board is clicked
+                    clicked = board.click(pos)
+                    if clicked:
+                        board.select(clicked[0], clicked[1])   
+            redraw_window(win, board, play_time, strikes)
+            pygame.display.update()
 main()
 pygame.display.quit
